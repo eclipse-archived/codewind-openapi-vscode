@@ -1,0 +1,9 @@
+out/
+node_modules/
+.vscode-test/
+*.vsix
+.project
+.DS_Store
+.nyc_output
+dev/LICENSE
+README.md

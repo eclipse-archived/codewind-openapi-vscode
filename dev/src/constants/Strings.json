@@ -1,0 +1,30 @@
+{
+    "commands" : {
+        "selectProject": "Select Docker volume-mountable project:",
+        "selectOpenApiDefinition": "Select an Open API Specification:",
+        "selectPrimaryLanguage": "Select the primary language for this project:",
+        "selectClientGenType" : "Select client generator type",
+        "selectServerGenType" : "Select server generator type"
+    },
+    "wizard": {
+        "selectOutputFolder": "Select As Output Folder",
+        "errorNoFoldersInWorkspace": "There are no folders in this workspace.  No stub was generated.",
+        "promptToOverwrite": "Existing files might be overwritten. Add filters to .openapi-generator-ignore to ensure that the wanted files are not overwritten. Continue?",
+        "yes": "Yes",
+        "promptToPullImage": "The docker image, openapi-generator-cli, needs to be pulled from dockerhub. Continue?",
+        "pullingImage": "Pulling image",
+        "generatorRunning": "Generator running",
+        "errorNoDefinitions": "There are no OpenAPI Specifications (files named 'openapi' with the extension json or yaml) in the project.  Copy or import an OpenAPI Specification into the project."
+    },
+    "codeGen": {
+        "success": "The {0} stub generated successfully",
+        "infoNoGeneratorTypes": "There are no {0} generator types for {1}",
+        "failedToGenerateStub": "Failed to generate the {0} stub with error.  Error: {1}",
+        "failedNonZeroStatus" : "The {0} stub had a non-zero status code {1} with error {2}"
+    },
+    "docGen": {
+        "success": "The HTML documentation generated successfully",
+        "failedToGenerateHtml" : "Failed to generate the HTML documentation. Error: {0}",
+        "failedNonZeroStatus" : "The HTML documentation generator had a non-zeron status code {0} with error {1}"
+    }
+}

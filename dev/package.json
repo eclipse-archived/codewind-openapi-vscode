@@ -1,0 +1,91 @@
+{
+	"name": "codewind-openapi-tools",
+	"displayName": "codewind-openapi-tools",
+	"description": "",
+	"version": "0.2.0",
+	"publisher": "IBM",
+	"engines": {
+		"vscode": "^1.33.0"
+	},
+	"license": "EPL-2.0",
+	"bugs": {
+		"url": "https://github.com/eclipse/codewind-openapi-vscode/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/eclipse/codewind-openapi-vscode"
+	},
+	"preview": true,
+	"categories": [
+		"Other"
+	],
+	"keywords": [
+		"openapi",
+		"codewind",
+		"eclipse"
+	],
+	"activationEvents": [
+		"onCommand:codewind.openapi-generate-client",
+		"onCommand:codewind.openapi-generate-server",
+		"onCommand:codewind.openapi-generate-html2"
+	],
+	"main": "./out/extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "codewind.openapi-generate-client",
+				"title": "Generate Client from OpenAPI Specification",
+				"category": "OpenAPI"
+			},
+			{
+				"command": "codewind.openapi-generate-server",
+				"title": "Generate Server from OpenAPI Specification",
+				"category": "OpenAPI"
+			},
+			{
+				"command": "codewind.openapi-generate-html2",
+				"title": "Generate HTML from OpenAPI Specification",
+				"category": "OpenAPI"
+			}
+		],
+		"menus": {
+			"view/item/context": [
+				{
+					"command": "codewind.openapi-generate-client",
+					"when": "view == ext.cw.explorer && viewItem =~ /ext\\.cw\\.project\\.enabled*/"
+				},
+				{
+					"command": "codewind.openapi-generate-server",
+					"when": "view == ext.cw.explorer && viewItem =~ /ext\\.cw\\.project\\.enabled*/"
+				},
+				{
+					"command": "codewind.openapi-generate-html2",
+					"when": "view == ext.cw.explorer && viewItem =~ /ext\\.cw\\.project\\.enabled*/"
+				}
+			]
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "npm i && npm run compile && npm run copy-strings && npm run copy-license",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"postinstall": "node ./node_modules/vscode/bin/install",
+		"test": "npm run compile && node ./node_modules/vscode/bin/test",
+		"copy-strings": "cp -v ./src/constants/Strings.json ./out/constants/",
+		"copy-license": "cp -v ../LICENSE ../README.md ."
+	},
+	"devDependencies": {
+		"@types/circular-json": "^0.4.0",
+		"@types/mocha": "^5.2.7",
+		"@types/node": "^12.0.4",
+		"@types/stack-trace": "0.0.29",
+		"tslint": "^5.17.0",
+		"typescript": "^3.5.2",
+		"vscode": "^1.1.34"
+	},
+	"dependencies": {
+		"circular-json": "^0.5.9",
+		"dockerode": "^2.5.8",
+		"stack-trace": "^0.0.10"
+	}
+}
