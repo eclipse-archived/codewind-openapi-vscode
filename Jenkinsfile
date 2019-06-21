@@ -31,7 +31,7 @@ spec:
     }
 
     stages {
-        stage('Build') {
+        stage('Preparation') {
             steps {
                 container("node") {
                     dir('dev') {
@@ -41,7 +41,7 @@ spec:
             }
         }
 
-        stage('Package') {
+        stage('Build') {
             steps {
                 container("node") {
 
@@ -73,27 +73,26 @@ spec:
             agent any	
            	steps {
                	sshagent ( ['projects-storage.eclipse.org-bot-ssh']) {
-                println("Deploying codewind-openapi-vscode to downoad area...")
-				sh '''
-		 			if [ -d "codewind-openapi-vscode" ]; then
-						rm -rf "codewind-openapi-vscode"
-					fi	
-		 			mkdir "codewind-openapi-vscode"
-					set
-				'''	
-				// get the stashed build output files 
-		 		dir ('codewind-openapi-vscode') {     
-		 			unstash 'BUILD_OUTPUT'
-		 		}	 
-                sh '''
-                	WORKSPACE=$PWD
-					ls -la ${WORKSPACE}/codewind-openapi-vscode/*
-                	echo ssh genie.codewind@projects-storage.eclipse.org rm -rf /home/data/httpd/download.eclipse.org/codewind/codewind-openapi-vscode/${GIT_BRANCH}/${BUILD_ID}
-            		echo ssh genie.codewind@projects-storage.eclipse.org mkdir -p /home/data/httpd/download.eclipse.org/codewind/codewind-openapi-vscode/${GIT_BRANCH}/${BUILD_ID}
-                    echo -r ${WORKSPACE}/codewind-openapi-vscode/* genie.codewind@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/codewind/codewind-openapi-vscode/${GIT_BRANCH}/${BUILD_ID}
-                 '''
-           }
-        }
+	                println("Deploying codewind-openapi-vscode to downoad area...")
+					sh '''
+			 			if [ -d "codewind-openapi-vscode" ]; then
+							rm -rf "codewind-openapi-vscode"
+						fi	
+			 			mkdir "codewind-openapi-vscode"
+						set
+					'''	
+					// get the stashed build output files 
+			 		dir ('codewind-openapi-vscode') {     
+			 			unstash 'BUILD_OUTPUT'
+			 		}	 
+	                sh '''
+	                	WORKSPACE=$PWD
+						ls -la ${WORKSPACE}/codewind-openapi-vscode/*
+	                	echo ssh genie.codewind@projects-storage.eclipse.org mkdir -p /home/data/httpd/download.eclipse.org/codewind/codewind-openapi-vscode/${GIT_BRANCH}/${BUILD_ID}
+	                    echo -r ${WORKSPACE}/codewind-openapi-vscode/* genie.codewind@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/codewind/codewind-openapi-vscode/${GIT_BRANCH}/${BUILD_ID}
+	                 '''
+	           }
+	        }
 		}
     }
 }
