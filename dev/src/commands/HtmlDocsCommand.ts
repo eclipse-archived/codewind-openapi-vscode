@@ -57,7 +57,7 @@ export default class HtmlDocsCommand extends AbstractGenerateCommand {
 
             Log.i("Mapped gen comamnd is " + 'generate -i /gen/' + this.selectedDefinition + ' -g ' + 'html2' + ' -o /out -v ' + this.fqPathToDefinition + ':/gen' + " -v " + this.fqPathOutputLocation +':/out');
             await docker.run(
-                "openapitools/openapi-generator-cli:v4.0.0",
+                "openapitools/openapi-generator-cli:v4.0.1",
                 ['generate', '-i', '/gen/' + this.selectedDefinition, '-g', 'html2', '-o', '/out'],
                 outStr,
                 {Binds: [`${this.fqPathToDefinition}:/gen`, `${this.fqPathOutputLocation}:/out`]},
