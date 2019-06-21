@@ -12,8 +12,6 @@ spec:
   - name: node
     image: node:lts
     tty: true
-    #command: [ "/usr/local/bin/uid_entrypoint" ]
-    #args: [ "cat" ]
     command:
       - cat
 """
@@ -31,69 +29,49 @@ spec:
     }
 
     stages {
-        stage('Preparation') {
-            steps {
-                container("node") {
-                    dir('dev') {
-                        sh "npm run vscode:prepublish"
-                    }
-                }
-            }
-        }
-
         stage('Build') {
             steps {
                 container("node") {
-
                     dir('dev') {
-                        sh '''
+                        sh '''#!/usr/bin/env bash
+                            # Test compilation to catch any errors
+                            npm run vscode:prepublish
+
+                            # Package for prod
                             npm i vsce
                             npx vsce package
-                            export artifact_name="$(basename *.vsix)"
+                            export artifact_name=$(basename *.vsix)
                             # rename to have datetime for clarity + prevent collisions
-                            mv $artifact_name ../${artifact_name}_$(date +'%F-%H%M').vsix
-                            export artifact_name="$(basename ../*.vsix)"
+                            mv -v $artifact_name ${artifact_name/.vsix/_$(date +'%F-%H%M').vsix}
+                            export artifact_name=$(basename *.vsix)
                         '''
+
+                        // Update the last_build file
+                        sh '''#!/usr/bin/env bash
+                            commit_info="$(git log -3 --pretty='%h by %an - %s\n')"
+                            printf "Last build #${BUILD_ID}: $artifact_name from $GIT_BRANCH:\n\n$commit_info" > last_build.txt
+                        '''
+
+                        // Note there must be exactly one .vsix
+                        stash includes: 'last_build.txt, *.vsix', name: 'deployables'
                     }
-
-                    // Update the last_build file
-                    sh '''
-                        commit_info="$(git log -3 --pretty='%h by %an - %s<br>')"
-                        export build_info_file="last_build.txt"
-                        printf "Last build: $artifact_name from $GIT_BRANCH:\n\n$commit_info" > $build_info_file
-                    '''
-
-                    // Note there must be exactly one .vsix
-                    stash includes: 'last_build.txt, *.vsix', name: 'BUILD_OUTPUT'
                 }
             }
         }
-        
-    	stage('Deploy') {
-            agent any	
-           	steps {
-               	sshagent ( ['projects-storage.eclipse.org-bot-ssh']) {
-	                println("Deploying codewind-openapi-vscode to downoad area...")
-					sh '''
-			 			if [ -d "codewind-openapi-vscode" ]; then
-							rm -rf "codewind-openapi-vscode"
-						fi	
-			 			mkdir "codewind-openapi-vscode"
-						set
-					'''	
-					// get the stashed build output files 
-			 		dir ('codewind-openapi-vscode') {     
-			 			unstash 'BUILD_OUTPUT'
-			 		}	 
-	                sh '''
-	                	WORKSPACE=$PWD
-						ls -la ${WORKSPACE}/codewind-openapi-vscode/*
-						echo ssh genie.codewind@projects-storage.eclipse.org rm -rf /home/data/httpd/download.eclipse.org/codewind/codewind-openapi-vscode/snapshots
-	                	echo ssh genie.codewind@projects-storage.eclipse.org mkdir -p /home/data/httpd/download.eclipse.org/codewind/codewind-openapi-vscode/${GIT_BRANCH}/${BUILD_ID}
-	                    echo -r ${WORKSPACE}/codewind-openapi-vscode/* genie.codewind@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/codewind/codewind-openapi-vscode/${GIT_BRANCH}/${BUILD_ID}
-	                 '''
-	           }
-	        }
-		}
+        stage ("Upload") {
+            agent any
+            steps {
+                sshagent (['projects-storage.eclipse.org-bot-ssh']) {
+                    unstash 'deployables'
+                    sh '''
+                        ls -lA
+                        export sshHost="genie.codewind@projects-storage.eclipse.org"
+                        export deployDir="/home/data/httpd/download.eclipse.org/codewind/codewind-openapi-vscode/${GIT_BRANCH}/${BUILD_ID}"
+                        ssh $sshHost mkdir -p $deployDir
+                        scp *.vsix last_build.txt ${sshHost}:${deployDir}
+                    '''
+                }
+            }
+        }
     }
 }
