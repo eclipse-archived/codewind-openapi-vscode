@@ -67,7 +67,7 @@ spec:
                     stash includes: 'last_build.txt, *.vsix', name: 'BUILD_OUTPUT'
 
                     sshagent (['projects-storage.eclipse.org-bot-ssh']) {
-                        unstash 'deploy'
+                        unstash 'BUILD_OUTPUT'
                         sh '''
                             ls -lA
                             export sshHost="genie.codewind@projects-storage.eclipse.org"
