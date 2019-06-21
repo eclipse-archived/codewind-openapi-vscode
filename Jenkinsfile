@@ -65,17 +65,6 @@ spec:
 
                     // Note there must be exactly one .vsix
                     stash includes: 'last_build.txt, *.vsix', name: 'BUILD_OUTPUT'
-
-                    sshagent (['projects-storage.eclipse.org-bot-ssh']) {
-                        unstash 'deploy'
-                        sh '''
-                            ls -lA
-                            export sshHost="genie.codewind@projects-storage.eclipse.org"
-                            export deployDir="/home/data/httpd/download.eclipse.org/codewind/codewind-openapi-vscode/$(date +'%F')"
-                            ssh $sshHost mkdir -p $deployDir
-                            scp -v *.vsix $build_info_file ${sshHost}:${deployDir}
-                        '''
-                    }
                 }
             }
         }
