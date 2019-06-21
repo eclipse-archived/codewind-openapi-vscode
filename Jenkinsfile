@@ -88,6 +88,7 @@ spec:
 	                sh '''
 	                	WORKSPACE=$PWD
 						ls -la ${WORKSPACE}/codewind-openapi-vscode/*
+						echo ssh genie.codewind@projects-storage.eclipse.org rm -rf /home/data/httpd/download.eclipse.org/codewind/codewind-openapi-vscode/snapshots
 	                	echo ssh genie.codewind@projects-storage.eclipse.org mkdir -p /home/data/httpd/download.eclipse.org/codewind/codewind-openapi-vscode/${GIT_BRANCH}/${BUILD_ID}
 	                    echo -r ${WORKSPACE}/codewind-openapi-vscode/* genie.codewind@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/codewind/codewind-openapi-vscode/${GIT_BRANCH}/${BUILD_ID}
 	                 '''
