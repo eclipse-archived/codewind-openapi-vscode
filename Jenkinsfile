@@ -63,7 +63,7 @@ spec:
                         export deployDir="/home/data/httpd/download.eclipse.org/codewind/codewind-openapi-vscode/${GIT_BRANCH}/${BUILD_ID}"
 
                         ssh $sshHost mkdir -p $deployDir
-                        scp *.vsix ${sshHost}:${deployDir}s
+                        scp *.vsix ${sshHost}:${deployDir}
                         # echo the downloadable url
                         echo "Uploaded to https://download.eclipse.org${deployDir##*download.eclipse.org}"
                     '''
