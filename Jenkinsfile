@@ -67,7 +67,7 @@ spec:
                     stash includes: 'last_build.txt, *.vsix', name: 'BUILD_OUTPUT'
 
                     sshagent (['projects-storage.eclipse.org-bot-ssh']) {
-                        unstash 'BUILD_OUTPUT'
+                        unstash 'deploy'
                         sh '''
                             ls -lA
                             export sshHost="genie.codewind@projects-storage.eclipse.org"
@@ -97,7 +97,7 @@ spec:
 		 			unstash 'BUILD_OUTPUT'
 		 		}	 
                 sh '''
-					WORKSPACE=$PWD
+                	WORKSPACE=$PWD
 					ls -la ${WORKSPACE}/codewind-openapi-vscode/*
                 	echo ssh genie.codewind@projects-storage.eclipse.org rm -rf /home/data/httpd/download.eclipse.org/codewind/codewind-openapi-vscode/${GIT_BRANCH}/${BUILD_ID}
             		echo ssh genie.codewind@projects-storage.eclipse.org mkdir -p /home/data/httpd/download.eclipse.org/codewind/codewind-openapi-vscode/${GIT_BRANCH}/${BUILD_ID}
