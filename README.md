@@ -5,7 +5,6 @@
 The Codewind OpenAPI Tools for VS Code provides commands that invoke the OpenAPI Generator to create API clients, server stubs, and HTML documentation from OpenAPI Specifications. The tools are integrated and customized to work with Codewind for VS Code, but they can also work without the Codewind extension.
 
 ## Installing
-
 1. Install [VS Code version 1.27 or later](https://code.visualstudio.com/download).
 2. Install Codewind for VS Code from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=IBM.codewind-tools) or by searching for `Codewind` in the [VS Code Extensions view](https://code.visualstudio.com/docs/editor/extension-gallery#_browse-for-extensions).
 3. This extension pulls the [OpenAPI Generator CLI Docker Image](https://github.com/OpenAPITools/openapi-generator#16---docker) and runs the OpenAPI Generator in a Docker container. Install Docker if necessary.
@@ -25,4 +24,4 @@ The Codewind OpenAPI Tools for VS Code provides commands that invoke the OpenAPI
 
 ## Contributing
 Submit issues:
-- [Submitting issues](https://github.com/eclipse/codewind-openapi-eclipse/issues)
+- [Submitting issues](https://github.com/eclipse/codewind-openapi-vscode/issues)
