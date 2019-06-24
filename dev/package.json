@@ -1,7 +1,7 @@
 {
 	"name": "codewind-openapi-tools",
 	"displayName": "codewind-openapi-tools",
-	"description": "",
+	"description": "Create API clients, server stubs, and HTML documentation from OpenAPI Specifications",
 	"version": "0.2.0",
 	"publisher": "IBM",
 	"engines": {
