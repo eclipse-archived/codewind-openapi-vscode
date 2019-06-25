@@ -23,5 +23,4 @@ The Codewind OpenAPI Tools for VS Code provides commands that invoke the OpenAPI
 - Generate HTML documentation from an OpenAPI definition file.
 
 ## Contributing
-Submit issues:
 - [Submitting issues](https://github.com/eclipse/codewind-openapi-vscode/issues)
