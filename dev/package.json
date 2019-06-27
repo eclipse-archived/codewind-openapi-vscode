@@ -16,6 +16,7 @@
 		"url": "https://github.com/eclipse/codewind-openapi-vscode"
 	},
 	"preview": true,
+	"icon": "res/img/braces256px.png",
 	"categories": [
 		"Other"
 	],
