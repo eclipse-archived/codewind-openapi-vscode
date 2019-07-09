@@ -2,7 +2,7 @@
 	"name": "codewind-openapi-tools",
 	"displayName": "Codewind OpenAPI Tools",
 	"description": "Create API clients, server stubs, and HTML documentation from OpenAPI Specifications",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"publisher": "IBM",
 	"engines": {
 		"vscode": "^1.33.0"
