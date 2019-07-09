@@ -64,10 +64,11 @@ export default abstract class AbstractGenerateCommand extends AbstractDockerComm
                 workspaceFolderContents = fs.readdirSync(filePath, { withFileTypes: true });                    
                 workspaceFolderContents.forEach((ff: dirent) => {
                     var fsdir = ff as dirent;
-                    try {    
-                        if (fs.lstatSync(filePath + "/" + fsdir.toString()).isDirectory() && !fsdir.toString().startsWith('.')) {
-                            folders.push(fsdir.toString());
-                            fullFolderPaths.push(wsFolder.uri.toString() + "/" + fsdir.toString());
+                    try {
+                        var name = (fsdir.name !== null && fsdir.name !== undefined) ? fsdir.name.toString() : fsdir.toString();
+                        if (fs.lstatSync(filePath + "/" + name).isDirectory() && !name.startsWith('.')) {
+                            folders.push(name);
+                            fullFolderPaths.push(wsFolder.uri.toString() + "/" + name);
                         }
                     } catch (error) {
                         Log.e("ERROR : " + error);
@@ -92,7 +93,8 @@ export default abstract class AbstractGenerateCommand extends AbstractDockerComm
                     filePath = this.localPath.path;
                     var dotProjectFolder = fs.readdirSync(filePath + "/../.projects", { withFileTypes: true });                                
                     dotProjectFolder.forEach((projInfFile: dirent) => {
-                        var contents = fs.readFileSync(filePath + "/../.projects/" + projInfFile.toString());
+                        var name = (projInfFile.name !== null && projInfFile.name !== undefined) ? projInfFile.name.toString() : projInfFile.toString();
+                        var contents = fs.readFileSync(filePath + "/../.projects/" + name);
                         var jsonObject = JSON.parse(contents);
                         if (this.projectName === jsonObject.name) {
                             this.projectLanguage = jsonObject.language;
@@ -219,14 +221,9 @@ export default abstract class AbstractGenerateCommand extends AbstractDockerComm
             var definitions: string[] = [];
             selectedFolderContents.forEach((aFile: dirent) => {
                 try {
-                    var name = aFile.toString();
+                    var name = (aFile.name !== null && aFile.name !== undefined) ? aFile.name.toString() : aFile.toString();
                     // Naming convention is openapi.(yaml|json), but let's be flexible.
-                    if (fs.lstatSync(this.localPath.path + "/" + name).isFile()
-                        && (name.toLowerCase().endsWith('openapi.yaml') 
-                                || name.toLowerCase().endsWith('openapi.yml')
-                                || name.toLowerCase().endsWith('openapi.json')
-                                || (name.toLowerCase().indexOf('openapi') >= 0 && (name.toLowerCase().endsWith('yaml') || name.toLowerCase().endsWith('yml') || name.toLowerCase().endsWith('json'))))
-                            )  {
+                    if (fs.lstatSync(this.localPath.path + "/" + name).isFile() && this.isPotentialOpenApiFile(name))  {
                         definitions.push(name);
                     } else { // folders for output locations
                         if (fs.lstatSync(this.localPath.path + "/" + name).isDirectory() && !name.startsWith('.')) {
@@ -283,18 +280,23 @@ export default abstract class AbstractGenerateCommand extends AbstractDockerComm
         });
     }
 
+    private isPotentialOpenApiFile(name: string) : boolean {
+        return ((name.toLowerCase().endsWith('yaml') || name.toLowerCase().endsWith('yml') || name.toLowerCase().endsWith('json'))
+            && name.toLowerCase() !== 'package.json'  // Filter out specific files
+            && name.toLowerCase() !== 'package-lock.json'
+            && name.toLowerCase() !== 'chart.yaml'
+            && name.toLowerCase() !== 'nodemon.json'
+            && name.toLowerCase() !== 'manifest.yml'
+            && name.toLowerCase() !== 'devfile.yaml');
+    }
+
     private async getAllOpenApiDefinitions(uri: vscode.Uri, definitions: string[]) {
         let selectedFolderContents: Array<dirent>;
         selectedFolderContents = fs.readdirSync(uri.path, { withFileTypes: true });
         selectedFolderContents.forEach((aFile: dirent) => {
             try {
-                var name = aFile.toString();
-                if (fs.lstatSync(uri.path + "/" + name).isFile()
-                        && (name.toLowerCase().endsWith('openapi.yaml') 
-                            || name.toLowerCase().endsWith('openapi.yml')
-                            || name.toLowerCase().endsWith('openapi.json')
-                            || (name.toLowerCase().indexOf('openapi') >= 0 && (name.toLowerCase().endsWith('yaml') || name.toLowerCase().endsWith('yml') || name.toLowerCase().endsWith('json'))))
-                    )  {
+                var name = (aFile.name !== null && aFile.name !== undefined) ? aFile.name.toString() : aFile.toString();
+                if (fs.lstatSync(uri.path + "/" + name).isFile() && this.isPotentialOpenApiFile(name))  {
                     var relativePathToProj = uri.toString().replace(this.localPath.toString(), "");
                     definitions.push(relativePathToProj + "/" + name);
                 } else { // folders for output locations

@@ -14,7 +14,7 @@
         "promptToPullImage": "The docker image, openapi-generator-cli, needs to be pulled from dockerhub. Continue?",
         "pullingImage": "Pulling image",
         "generatorRunning": "Generator running",
-        "errorNoDefinitions": "There are no OpenAPI Specifications (files named 'openapi' with the extension json or yaml) in the project.  Copy or import an OpenAPI Specification into the project."
+        "errorNoDefinitions": "There are no OpenAPI Specifications in the project.  Copy or import an OpenAPI Specification into the project."
     },
     "codeGen": {
         "success": "The {0} stub generated successfully",
