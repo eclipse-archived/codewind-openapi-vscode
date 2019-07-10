@@ -59,17 +59,25 @@ spec:
                     unstash 'deployables'
                     sh '''#!/usr/bin/env bash
                         # ls -lA
+                        export sshHost="genie.codewind@projects-storage.eclipse.org"
+                        export deployParentDir="/home/data/httpd/download.eclipse.org/codewind/codewind-openapi-vscode"
+                        
                         if [ -z $CHANGE_ID ]; then
     					    UPLOAD_DIR="$GIT_BRANCH/$BUILD_ID"
+    					    
+    					    ssh $sshHost rm -rf $deployParentDir/$GIT_BRANCH/latest
+                  	  		ssh $sshHost mkdir -p $deployParentDir/$GIT_BRANCH/latest
+                  	  		scp *.vsix $sshHost:$deployParentDir/$GIT_BRANCH/latest
 					    else
     					    UPLOAD_DIR="pr/$CHANGE_ID/$BUILD_ID"
 					    fi
  
-                        export sshHost="genie.codewind@projects-storage.eclipse.org"
-                        export deployDir="/home/data/httpd/download.eclipse.org/codewind/codewind-openapi-vscode/${UPLOAD_DIR}"
-
+                        export deployDir="$deployParentDir/$UPLOAD_DIR"
+						
+						ssh $sshHost rm -rf $deployDir
                         ssh $sshHost mkdir -p $deployDir
-                        scp *.vsix ${sshHost}:${deployDir}
+                        scp *.vsix $sshHost:$deployDir
+                        
                         # echo the downloadable url
                         echo "Uploaded to https://download.eclipse.org${deployDir##*download.eclipse.org}"
                     '''
