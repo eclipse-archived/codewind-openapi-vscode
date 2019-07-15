@@ -6,15 +6,15 @@ The Codewind OpenAPI Tools for VS Code provides commands that invoke the OpenAPI
 
 ## Installing
 1. Install [VS Code version 1.27 or later](https://code.visualstudio.com/download).
-2. Install Codewind for VS Code from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=IBM.codewind-tools) or by searching for `Codewind` in the [VS Code Extensions view](https://code.visualstudio.com/docs/editor/extension-gallery#_browse-for-extensions).
+2. (OPTIONAL) Install Codewind for VS Code from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=IBM.codewind-tools) or by searching for `Codewind` in the [VS Code Extensions view](https://code.visualstudio.com/docs/editor/extension-gallery#_browse-for-extensions).
 3. This extension pulls the [OpenAPI Generator CLI Docker Image](https://github.com/OpenAPITools/openapi-generator#16---docker) and runs the OpenAPI Generator in a Docker container. Install Docker if necessary.
 
 ## Running commands
-1. To access the commands, go to the **Explorer** view group and open the **Codewind** view.
-2. See the available actions from the **Command Palette** or the **Codewind** view.
+1. Before you run a command, ensure the OpenAPI definition is in the folder or project.
+2. If you have **Codewind** installed, go to the **Explorer** view group and open the **Codewind** view.
+  - Access the context menu commands from the Codewind view, go to the context menu on a project and select one of the **Generate** actions.
+3. The commands are also available from the **Command Palette** .
   - Open the [Command Palette](https://code.visualstudio.com/docs/getstarted/userinterface#_command-palette) and type `OpenAPI` to see the actions available.
-  - Or, to access the context menu commands from the Codewind view, go to the context menu on a project and select one of the **Generate** actions.
-3. Before you run a command, ensure the OpenAPI definition is in the folder or project.
 4. After you generate code, edit the `.openapi-generator-ignore` file to ensure that subsequent code generation does not overwrite custom code.
 
 ## Features
