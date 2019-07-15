@@ -10,11 +10,11 @@ The Codewind OpenAPI Tools for VS Code provides commands that invoke the OpenAPI
 3. This extension pulls the [OpenAPI Generator CLI Docker Image](https://github.com/OpenAPITools/openapi-generator#16---docker) and runs the OpenAPI Generator in a Docker container. Install Docker if necessary.
 
 ## Running commands
-1. If you have **Codewind** installed, go to the **Explorer** view group and open the **Codewind** view.
+1. Before you run a command, ensure the OpenAPI definition is in the folder or project.
+2. If you have **Codewind** installed, go to the **Explorer** view group and open the **Codewind** view.
   - Access the context menu commands from the Codewind view, go to the context menu on a project and select one of the **Generate** actions.
-2. See the available actions from the **Command Palette** .
+3. The commands are also available from the **Command Palette** .
   - Open the [Command Palette](https://code.visualstudio.com/docs/getstarted/userinterface#_command-palette) and type `OpenAPI` to see the actions available.
-3. Before you run a command, ensure the OpenAPI definition is in the folder or project.
 4. After you generate code, edit the `.openapi-generator-ignore` file to ensure that subsequent code generation does not overwrite custom code.
 
 ## Features
