@@ -87,6 +87,9 @@ spec:
                         echo "build_info.url=$BUILD_URL" >> $BUILD_INFO
                         SHA1=$(sha1sum ${OUTPUT_NAME}.vsix | cut -d ' ' -f 1)
                         echo "build_info.SHA-1=${SHA1}" >> $BUILD_INFO
+
+                        scp $BUILD_INFO $sshHost:$deployParentDir/$GIT_BRANCH/$LATEST_DIR/$BUILD_INFO
+                        rm $BUILD_INFO
                         rm $OUTPUT_NAME.vsix
                         
                         export deployDir="$deployParentDir/$UPLOAD_DIR"
