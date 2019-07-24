@@ -67,7 +67,7 @@ spec:
                     unstash 'deployables'
                     
                     sh '''#!/usr/bin/env bash
-                        export REPO_NAME="odewind-openapi-vscode"
+                        export REPO_NAME="codewind-openapi-vscode"
                         export OUTPUT_NAME="codewind-openapi-tools"
                         export DOWNLOAD_AREA_URL="https://download.eclipse.org/codewind/$REPO_NAME"
                         export LATEST_DIR="latest"
