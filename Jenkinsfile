@@ -34,6 +34,7 @@ spec:
                 container("node") {
                     dir('dev') {
                         sh '''#!/usr/bin/env bash
+                        	echo "TEST: JENKINSFILE FROM A FORK"
                             # Test compilation to catch any errors
                             npm run vscode:prepublish
 
