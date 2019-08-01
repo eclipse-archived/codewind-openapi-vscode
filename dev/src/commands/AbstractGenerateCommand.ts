@@ -27,9 +27,11 @@ export default abstract class AbstractGenerateCommand extends AbstractDockerComm
     protected preferredSourceLocation: string = "";
     protected childSourceFolderToAppend: string = "";
     protected projectLanguage: string = "";
+    protected pathSeparator: string = "";
 
     constructor(protected readonly _generatorType: string) {
         super();
+        this.pathSeparator = this.getPathSeparator();
     }
 
     protected async abstract doGeneration(progress: vscode.Progress<{}>) : Promise<void>;
@@ -66,9 +68,9 @@ export default abstract class AbstractGenerateCommand extends AbstractDockerComm
                     var fsdir = ff as dirent;
                     try {
                         var name = (fsdir.name !== null && fsdir.name !== undefined) ? fsdir.name.toString() : fsdir.toString();
-                        if (fs.lstatSync(filePath + "/" + name).isDirectory() && !name.startsWith('.')) {
+                        if (fs.lstatSync(filePath + this.pathSeparator + name).isDirectory() && !name.startsWith('.') && name !== "bin") {
                             folders.push(name);
-                            fullFolderPaths.push(wsFolder.uri.toString() + "/" + name);
+                            fullFolderPaths.push(wsFolder.uri.fsPath.toString() + this.pathSeparator + name);
                         }
                     } catch (error) {
                         Log.e("ERROR : " + error);
@@ -82,7 +84,7 @@ export default abstract class AbstractGenerateCommand extends AbstractDockerComm
                         return;
                     }
                     var idx = folders.indexOf(selectedFolder);
-                    this.localPath = vscode.Uri.parse(fullFolderPaths[idx]);
+                    this.localPath = vscode.Uri.file(fullFolderPaths[idx]);
                     this.projectName = selectedFolder;
                 });
                 if (this.projectName === "") {
@@ -90,17 +92,24 @@ export default abstract class AbstractGenerateCommand extends AbstractDockerComm
                 }
                 var breakForEach = {};
                 try {
-                    filePath = this.localPath.path;
-                    var dotProjectFolder = fs.readdirSync(filePath + "/../.projects", { withFileTypes: true });                                
-                    dotProjectFolder.forEach((projInfFile: dirent) => {
-                        var name = (projInfFile.name !== null && projInfFile.name !== undefined) ? projInfFile.name.toString() : projInfFile.toString();
-                        var contents = fs.readFileSync(filePath + "/../.projects/" + name);
-                        var jsonObject = JSON.parse(contents);
-                        if (this.projectName === jsonObject.name) {
-                            this.projectLanguage = jsonObject.language;
-                            throw breakForEach;
-                        }
-                    });
+                    filePath = this.localPath.fsPath;
+                    var dotProjectFolder = null;
+                    try {
+                        dotProjectFolder = fs.readdirSync(filePath + "/../.projects", { withFileTypes: true });
+                    } catch (projectError) {
+                        // ignore
+                    }
+                    if (dotProjectFolder) {
+                        dotProjectFolder.forEach((projInfFile: dirent) => {
+                            var name = (projInfFile.name !== null && projInfFile.name !== undefined) ? projInfFile.name.toString() : projInfFile.toString();
+                            var contents = fs.readFileSync(filePath + "/../.projects/" + name);
+                            var jsonObject = JSON.parse(contents);
+                            if (this.projectName === jsonObject.name) {
+                                this.projectLanguage = jsonObject.language;
+                                throw breakForEach;
+                            }
+                        });
+                    }
                 } catch (err) {
                     // ignore if there is no .projects folder potentially MC's
                     if (err === breakForEach) {
@@ -122,7 +131,7 @@ export default abstract class AbstractGenerateCommand extends AbstractDockerComm
                 canSelectFiles: false,
                 canSelectFolders: true,
                 canSelectMany: false,
-                defaultUri: this.childSourceFolderToAppend.length === 0 ? this.localPath : vscode.Uri.parse(this.localPath.toString() + this.childSourceFolderToAppend),
+                defaultUri: this.childSourceFolderToAppend.length === 0 ? this.localPath : vscode.Uri.file(this.localPath.fsPath.toString() + this.childSourceFolderToAppend),
                 openLabel: Translator.getString("wizard.selectOutputFolder") // Has to be short, for the 'button'
             };
             var selectedWSFolder: vscode.Uri[] = [];
@@ -137,12 +146,13 @@ export default abstract class AbstractGenerateCommand extends AbstractDockerComm
                 reject("Output folder was not selected.");  // For log
                 return;  // Dialog was canceled
             }
-            var selectedOutputLocation = selectedWSFolder[0].path;
             // ***** -o Generator output option ***
-            this.fqPathOutputLocation = selectedOutputLocation;
+            var selectedUriFolder = selectedWSFolder[0];
+            this.fqPathOutputLocation = this.getPlatformPath(selectedUriFolder.path);
             // ************************************   
             try {
-                if (fs.lstatSync(this.fqPathOutputLocation + "/.openapi-generator-ignore").isFile()) {
+                Log.i("Check .openapi-generator-ignore file:" + selectedUriFolder.fsPath + this.pathSeparator + ".openapi-generator-ignore");
+                if (fs.lstatSync(selectedUriFolder.fsPath + this.pathSeparator + ".openapi-generator-ignore").isFile()) {
                     const response = await vscode.window.showWarningMessage(Translator.getString("wizard.promptToOverwrite"), {modal : true}, Translator.getString("wizard.yes"));
                     if (response === Translator.getString("wizard.yes")) {
                         resolve();
@@ -217,20 +227,20 @@ export default abstract class AbstractGenerateCommand extends AbstractDockerComm
     protected async gatherOpenApiDefinitions() : Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             let selectedFolderContents: Array<dirent>;
-            selectedFolderContents = fs.readdirSync(this.localPath.path, { withFileTypes: true });
+            selectedFolderContents = fs.readdirSync(this.localPath.fsPath, { withFileTypes: true });
             var definitions: string[] = [];
             selectedFolderContents.forEach((aFile: dirent) => {
                 try {
                     var name = (aFile.name !== null && aFile.name !== undefined) ? aFile.name.toString() : aFile.toString();
                     // Naming convention is openapi.(yaml|json), but let's be flexible.
-                    if (fs.lstatSync(this.localPath.path + "/" + name).isFile() && this.isPotentialOpenApiFile(name))  {
+                    if (fs.lstatSync(this.localPath.fsPath + this.pathSeparator + name).isFile() && this.isPotentialOpenApiFile(name))  {
                         definitions.push(name);
                     } else { // folders for output locations
-                        if (fs.lstatSync(this.localPath.path + "/" + name).isDirectory() && !name.startsWith('.')) {
+                        if (fs.lstatSync(this.localPath.fsPath + this.pathSeparator + name).isDirectory() && !name.startsWith('.') && name !== "bin") {
                             if (name === this.preferredSourceLocation) {
-                                this.childSourceFolderToAppend = "/" + name;
+                                this.childSourceFolderToAppend = this.pathSeparator + name;
                             }
-                            this.getAllOpenApiDefinitions(vscode.Uri.parse(this.localPath.toString() + "/" + name), definitions);
+                            this.getAllOpenApiDefinitions(vscode.Uri.file(this.localPath.fsPath.toString() + this.pathSeparator + name), definitions);
                         }
                     }
                 } catch (error) {
@@ -258,7 +268,7 @@ export default abstract class AbstractGenerateCommand extends AbstractDockerComm
                 reject("Definition is empty"); // For log
                 return;
             }
-            this.fqPathToDefinition = this.localPath.path;
+            this.fqPathToDefinition = this.getPlatformPath(this.localPath.path);  // NOT fsPath
             resolve();
         });
     }
@@ -280,8 +290,26 @@ export default abstract class AbstractGenerateCommand extends AbstractDockerComm
         });
     }
 
+    private getPlatformPath(fqPath: string) : string {
+        var adjustedPath = fqPath;
+        if (process.platform.toLowerCase().startsWith("win")) {
+            if (fqPath.charAt(2) === ':') {
+                adjustedPath = fqPath.substr(0, 2) + fqPath.substr(3);
+            }
+        }
+        return adjustedPath;
+    }
+
+    private getPathSeparator() : string {
+        if (process.platform.toLowerCase().startsWith("win")) {
+            return "\\";
+        }
+        return "/";
+    }
+
     private isPotentialOpenApiFile(name: string) : boolean {
         return ((name.toLowerCase().endsWith('yaml') || name.toLowerCase().endsWith('yml') || name.toLowerCase().endsWith('json'))
+            && !name.startsWith('.')
             && name.toLowerCase() !== 'package.json'  // Filter out specific files
             && name.toLowerCase() !== 'package-lock.json'
             && name.toLowerCase() !== 'chart.yaml'
@@ -292,16 +320,16 @@ export default abstract class AbstractGenerateCommand extends AbstractDockerComm
 
     private async getAllOpenApiDefinitions(uri: vscode.Uri, definitions: string[]) {
         let selectedFolderContents: Array<dirent>;
-        selectedFolderContents = fs.readdirSync(uri.path, { withFileTypes: true });
+        selectedFolderContents = fs.readdirSync(uri.fsPath, { withFileTypes: true });
         selectedFolderContents.forEach((aFile: dirent) => {
             try {
                 var name = (aFile.name !== null && aFile.name !== undefined) ? aFile.name.toString() : aFile.toString();
-                if (fs.lstatSync(uri.path + "/" + name).isFile() && this.isPotentialOpenApiFile(name))  {
-                    var relativePathToProj = uri.toString().replace(this.localPath.toString(), "");
-                    definitions.push(relativePathToProj + "/" + name);
+                if (fs.lstatSync(uri.fsPath + this.pathSeparator + name).isFile() && this.isPotentialOpenApiFile(name))  {
+                    var relativePathToProj = uri.fsPath.toString().replace(this.localPath.fsPath.toString(), "");
+                    definitions.push(relativePathToProj + this.pathSeparator + name);
                 } else { // folders for output locations
-                    if (fs.lstatSync(uri.path + "/" + name).isDirectory() && !name.startsWith('.')) {
-                        this.getAllOpenApiDefinitions(vscode.Uri.parse(uri.toString() + "/" + name), definitions);
+                    if (fs.lstatSync(uri.fsPath + this.pathSeparator + name).isDirectory() && !name.startsWith('.')) {
+                        this.getAllOpenApiDefinitions(vscode.Uri.file(uri.fsPath.toString() + this.pathSeparator + name), definitions);
                     }
                 }
             } catch (error) {
