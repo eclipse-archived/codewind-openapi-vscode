@@ -179,7 +179,8 @@ export default abstract class AbstractGenerateStubCommand extends AbstractGenera
                 "openapitools/openapi-generator-cli:v4.0.1",
                 ['generate', '-i', '/gen/' + this.selectedDefinition, '-g', this.selectedGeneratorType, '-o', '/out'],
                 outStr,
-                {Binds: [`${this.fqPathToDefinition}:/gen`, `${this.fqPathOutputLocation}:/out`]},
+                {HostConfig: {"Binds": [`${this.fqPathToDefinition}:/gen`, `${this.fqPathOutputLocation}:/out`] }},
+                {},
                 async (err : any, data: any, ctnr: any) => {
                     ctnr.remove();
                     if (err) {
