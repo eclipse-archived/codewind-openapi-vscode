@@ -1,7 +1,7 @@
 {
     "commands" : {
         "selectProject": "Select Docker volume-mountable project:",
-        "selectOpenApiDefinition": "Select an Open API Specification:",
+        "selectOpenApiDefinition": "Select an Open API Definition:",
         "selectPrimaryLanguage": "Select the primary language for this project:",
         "selectClientGenType" : "Select client generator type",
         "selectServerGenType" : "Select server generator type"
@@ -14,7 +14,7 @@
         "promptToPullImage": "The docker image, openapi-generator-cli, needs to be pulled from dockerhub. Continue?",
         "pullingImage": "Pulling image",
         "generatorRunning": "Generator running",
-        "errorNoDefinitions": "There are no OpenAPI Specifications in the project.  Copy or import an OpenAPI Specification into the project."
+        "errorNoDefinitions": "There are no OpenAPI definitions in the project.  Copy or import an OpenAPI definition into the project."
     },
     "codeGen": {
         "success": "The {0} stub generated successfully",
