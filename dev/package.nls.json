@@ -1,0 +1,8 @@
+{
+    "displayName": "Codewind OpenAPI Tools",
+    "description": "Create API clients, server stubs, and HTML documentation from an OpenAPI definition",
+    "category": "OpenAPI",
+    "generateClient": "Generate Client from OpenAPI Definition",
+    "generateServer": "Generate Server from OpenAPI Definition",
+    "generateHtml": "Generate HTML from OpenAPI Definition"
+}

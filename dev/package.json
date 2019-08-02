@@ -1,8 +1,8 @@
 {
 	"name": "codewind-openapi-tools",
-	"displayName": "Codewind OpenAPI Tools",
-	"description": "Create API clients, server stubs, and HTML documentation from OpenAPI Specifications",
-	"version": "0.2.1",
+	"displayName": "%displayName%",
+	"description": "%description%",
+	"version": "0.2.2",
 	"publisher": "IBM",
 	"engines": {
 		"vscode": "^1.33.0"
@@ -35,18 +35,18 @@
 		"commands": [
 			{
 				"command": "codewind.openapi-generate-client",
-				"title": "Generate Client from OpenAPI Specification",
-				"category": "OpenAPI"
+				"title": "%generateClient%",
+				"category": "%category%"
 			},
 			{
 				"command": "codewind.openapi-generate-server",
-				"title": "Generate Server from OpenAPI Specification",
-				"category": "OpenAPI"
+				"title": "%generateServer%",
+				"category": "%category%"
 			},
 			{
 				"command": "codewind.openapi-generate-html2",
-				"title": "Generate HTML from OpenAPI Specification",
-				"category": "OpenAPI"
+				"title": "%generateHtml%",
+				"category": "%category%"
 			}
 		],
 		"menus": {
