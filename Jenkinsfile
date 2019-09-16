@@ -84,6 +84,7 @@ spec:
                         cp $OUTPUT_NAME-*.vsix $OUTPUT_NAME.vsix
                         scp $OUTPUT_NAME.vsix $sshHost:$deployParentDir/$GIT_BRANCH/$LATEST_DIR/$OUTPUT_NAME.vsix
 
+                        echo "# Build date: $(date +%F-%T)" >> $OUTPUT_DIR/$BUILD_INFO
                         echo "build_info.url=$BUILD_URL" >> $BUILD_INFO
                         SHA1=$(sha1sum ${OUTPUT_NAME}.vsix | cut -d ' ' -f 1)
                         echo "build_info.SHA-1=${SHA1}" >> $BUILD_INFO
