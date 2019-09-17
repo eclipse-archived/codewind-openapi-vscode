@@ -125,6 +125,49 @@ export default abstract class AbstractGenerateCommand extends AbstractDockerComm
         }
     }
 
+    protected async promptForOpenApiDefinition() : Promise<string> {
+        return new Promise<string>(async (resolve, reject) => {
+            var openDialogOptions: vscode.OpenDialogOptions = {
+                canSelectFiles: true,
+                canSelectFolders: false,
+                canSelectMany: false,
+                defaultUri: this.childSourceFolderToAppend.length === 0 ? this.localPath : vscode.Uri.file(this.localPath.fsPath.toString() + this.childSourceFolderToAppend),
+                filters: { [`${Translator.getString("wizard.openApiFilter")}`]: ['yaml', 'yml', 'json'] },
+                openLabel: Translator.getString("wizard.promptForDefinition") // Has to be short, for the 'button'
+            };
+            var selectedFile: vscode.Uri[] = [];
+            selectedFile = await vscode.window.showOpenDialog(openDialogOptions).then((tempSelectedFile) => {
+                Log.i("Selected OpenAPI Definition is = " + tempSelectedFile);
+                if (tempSelectedFile === undefined) {
+                    return [];
+                }
+                return tempSelectedFile;
+            });
+            if (selectedFile.length === 0) {
+                reject("Selected file was not selected.");  // For log
+                return;  // Dialog was canceled
+            }
+            // ***** -i option ***
+            this.selectedDefinition = this.getFilenameFromPath(this.localPath.path, selectedFile[0].path);
+            // ************************************
+            Log.i("Selected file is: " + this.selectedDefinition);
+            if (this.selectedDefinition.length === 0) {
+                // Do this because the file browser allows users to navigate to locations outside of the workspace
+                // and potentially select a file from a different folder. We need to volume mount the project path, 
+                // based on the selected project from the previous step during this command flow
+                vscode.window.showErrorMessage(Translator.getString("wizard.errorSelectOnlyFromProject", this.localPath.path));
+                return;
+            }
+            if (!this.isPotentialOpenApiFile(this.selectedDefinition)) {
+                vscode.window.showErrorMessage(Translator.getString("wizard.errorNotADefinition", this.selectedDefinition));
+                return;
+            }
+            // Mount point
+            this.fqPathToDefinition = this.getPlatformPath(this.localPath.path);  // NOT fsPath
+            resolve();
+        });
+    }
+
     protected async getOutputLocation() : Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             var openDialogOptions: vscode.OpenDialogOptions = {
@@ -145,6 +188,14 @@ export default abstract class AbstractGenerateCommand extends AbstractDockerComm
             if (selectedWSFolder.length === 0) {
                 reject("Output folder was not selected.");  // For log
                 return;  // Dialog was canceled
+            }
+            // Do this because the file browser allows users potentially navigate to outside of the workspace
+            // and select a file from a different folder.  We need to volume mount this path, from the selected
+            // project in the previous step in this command flow
+            var isChildFolder = this.isChildFolder(this.localPath.path, selectedWSFolder[0].path);
+            if (!isChildFolder) {
+                vscode.window.showErrorMessage(Translator.getString("wizard.errorSelectFolderFromProject", this.localPath.path));
+                return;
             }
             // ***** -o Generator output option ***
             var selectedUriFolder = selectedWSFolder[0];
@@ -224,55 +275,6 @@ export default abstract class AbstractGenerateCommand extends AbstractDockerComm
         });
     }
 
-    protected async gatherOpenApiDefinitions() : Promise<string> {
-        return new Promise<string>(async (resolve, reject) => {
-            let selectedFolderContents: Array<dirent>;
-            selectedFolderContents = fs.readdirSync(this.localPath.fsPath, { withFileTypes: true });
-            var definitions: string[] = [];
-            selectedFolderContents.forEach((aFile: dirent) => {
-                try {
-                    var name = (aFile.name !== null && aFile.name !== undefined) ? aFile.name.toString() : aFile.toString();
-                    // Naming convention is openapi.(yaml|json), but let's be flexible.
-                    if (fs.lstatSync(this.localPath.fsPath + this.pathSeparator + name).isFile() && this.isPotentialOpenApiFile(name))  {
-                        definitions.push(name);
-                    } else { // folders for output locations
-                        if (fs.lstatSync(this.localPath.fsPath + this.pathSeparator + name).isDirectory() && !name.startsWith('.') && name !== "bin") {
-                            if (name === this.preferredSourceLocation) {
-                                this.childSourceFolderToAppend = this.pathSeparator + name;
-                            }
-                            this.getAllOpenApiDefinitions(vscode.Uri.file(this.localPath.fsPath.toString() + this.pathSeparator + name), definitions);
-                        }
-                    }
-                } catch (error) {
-                    reject("Error retrieving OpenAPI definitions from the project: " + error); // For Log
-                    return;
-                }
-            });
-            if (definitions.length === 0) {
-                vscode.window.showErrorMessage(Translator.getString("wizard.errorNoDefinitions"));
-                reject("There are no OpenAPI definitions in the project/folder");
-                return;
-            }
-            // ****** Generator Option *********
-            this.selectedDefinition = "";
-            // *********************************
-            const tempFileSelected = await vscode.window.showQuickPick(definitions, Constants.QUICK_PICK_OPTION_OPENAPI_DEFINITIONS);
-            Log.i("Selected Definition: " + tempFileSelected);
-            if (tempFileSelected === undefined) {
-                reject("Definition is undefined"); // For log
-                return;
-            } else {
-                this.selectedDefinition = tempFileSelected;
-            }
-            if (this.selectedDefinition === "") { // cancelled
-                reject("Definition is empty"); // For log
-                return;
-            }
-            this.fqPathToDefinition = this.getPlatformPath(this.localPath.path);  // NOT fsPath
-            resolve();
-        });
-    }
-
     protected async enableProgressReporter(progress: vscode.Progress<{}>) : Promise<Stream> {
         var outStr : Stream = new Stream.PassThrough();
         return new Promise<Stream>(async (resolve) => {
@@ -288,6 +290,21 @@ export default abstract class AbstractGenerateCommand extends AbstractDockerComm
             });
             resolve(outStr);
         });
+    }
+
+    private isChildFolder(initialPath: string, fqPath: string) : boolean {
+        var index = fqPath.lastIndexOf(initialPath);
+        if (process.platform.toLowerCase().startsWith("win")) {
+            index = fqPath.toLowerCase().lastIndexOf(initialPath.toLowerCase());
+        }
+        return (index === 0);
+    }
+
+    private getFilenameFromPath(initialPath: string, fqPath: string) : string {
+        if (this.isChildFolder(initialPath, fqPath)) {
+            return fqPath.substr(initialPath.length + 1);  // ends with a slash
+        }
+        return "";
     }
 
     private getPlatformPath(fqPath: string) : string {
@@ -307,35 +324,19 @@ export default abstract class AbstractGenerateCommand extends AbstractDockerComm
         return "/";
     }
 
+    // No built-in way to do content checking
     private isPotentialOpenApiFile(name: string) : boolean {
-        return ((name.toLowerCase().endsWith('yaml') || name.toLowerCase().endsWith('yml') || name.toLowerCase().endsWith('json'))
-            && !name.startsWith('.')
-            && name.toLowerCase() !== 'package.json'  // Filter out specific files
-            && name.toLowerCase() !== 'package-lock.json'
-            && name.toLowerCase() !== 'chart.yaml'
-            && name.toLowerCase() !== 'nodemon.json'
-            && name.toLowerCase() !== 'manifest.yml'
-            && name.toLowerCase() !== 'devfile.yaml');
+        var adjustedName = name.toLowerCase();
+        if (adjustedName.startsWith('.')
+            || adjustedName.endsWith('package.json')
+            || adjustedName.endsWith('package-lock.json')
+            || adjustedName.endsWith('chart.yaml')
+            || adjustedName.endsWith('nodemon.json')
+            || adjustedName.endsWith('manifest.yml')
+            || adjustedName.endsWith('tslint.json')
+            || adjustedName.endsWith('devfile.yaml')) {
+            return false;
+        }
+        return true; // Return true 'blindly' accepting that it is an OpenAPI document
     }
-
-    private async getAllOpenApiDefinitions(uri: vscode.Uri, definitions: string[]) {
-        let selectedFolderContents: Array<dirent>;
-        selectedFolderContents = fs.readdirSync(uri.fsPath, { withFileTypes: true });
-        selectedFolderContents.forEach((aFile: dirent) => {
-            try {
-                var name = (aFile.name !== null && aFile.name !== undefined) ? aFile.name.toString() : aFile.toString();
-                if (fs.lstatSync(uri.fsPath + this.pathSeparator + name).isFile() && this.isPotentialOpenApiFile(name))  {
-                    var relativePathToProj = uri.fsPath.toString().replace(this.localPath.fsPath.toString(), "");
-                    definitions.push(relativePathToProj + this.pathSeparator + name);
-                } else { // folders for output locations
-                    if (fs.lstatSync(uri.fsPath + this.pathSeparator + name).isDirectory() && !name.startsWith('.')) {
-                        this.getAllOpenApiDefinitions(vscode.Uri.file(uri.fsPath.toString() + this.pathSeparator + name), definitions);
-                    }
-                }
-            } catch (error) {
-                Log.e("Error retrieving OpenAPI definitions from the project: " + error);
-            }
-        });
-    }
-
 }

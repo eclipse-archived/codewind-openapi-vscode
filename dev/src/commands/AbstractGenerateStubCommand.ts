@@ -64,7 +64,7 @@ export default abstract class AbstractGenerateStubCommand extends AbstractGenera
             }
             // scan the project for OpenAPI definitions
             if (this.projectName !== "") {
-                await this.gatherOpenApiDefinitions();
+                await this.promptForOpenApiDefinition();
                 if (this.projectLanguage === "" || this.projectLanguage === "unknown") { // If project language is still not determined, we must prompt the user
                     var langTypeMap = Constants.ALL_CLIENT_LANGUAGES;
                     if (this._generatorType === "server") {
