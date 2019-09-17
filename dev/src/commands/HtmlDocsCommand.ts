@@ -40,7 +40,7 @@ export default class HtmlDocsCommand extends AbstractGenerateCommand {
             }
             // scan the project for OpenAPI definitions
             if (this.projectName !== "") {
-                await this.gatherOpenApiDefinitions();
+                await this.promptForOpenApiDefinition();
                 await this.getOutputLocation();
                 await this.callGenerator();
             }

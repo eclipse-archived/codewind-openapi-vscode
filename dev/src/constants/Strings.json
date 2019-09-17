@@ -14,7 +14,11 @@
         "promptToPullImage": "The docker image, openapi-generator-cli, needs to be pulled from dockerhub. Continue?",
         "pullingImage": "Pulling image",
         "generatorRunning": "Generator running",
-        "errorNoDefinitions": "There are no OpenAPI definitions in the project.  Copy or import an OpenAPI definition into the project."
+        "errorNotADefinition": "The selected file {0}, based on its name, is likely not an OpenAPI document.  Choose another file.",
+        "promptForDefinition": "Select Definition",
+        "errorSelectOnlyFromProject": "Select an OpenAPI definition from the chosen project {0}",
+        "errorSelectFolderFromProject": "Select the target output folder from the chosen project {0}",
+        "openApiFilter": "OpenAPI Files"
     },
     "codeGen": {
         "success": "The {0} stub generated successfully",
