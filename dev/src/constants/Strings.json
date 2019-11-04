@@ -18,7 +18,11 @@
         "promptForDefinition": "Select Definition",
         "errorSelectOnlyFromProject": "Select an OpenAPI definition from the chosen project {0}",
         "errorSelectFolderFromProject": "Select the target output folder from the chosen project {0}",
-        "openApiFilter": "OpenAPI Files"
+        "openApiFilter": "OpenAPI Files",
+        "existingFilesWarning": "The existing {0} file will be merged with the one that is generated. The original will be backed up. Other files might be overwritten by the generator. Do you want to continue?",
+        "existingFilesWarningForSpring": "The existing {0} file will be merged with the one that is generated. The original will be backed up. Other files might be overwritten by the generator. The generated main class will not be registered with Spring. Do you want to continue?",
+        "failedToBackupFile": "Error: Codewind failed to back up the current {0} file prior to code generation. A backup is necessary for proper project configuration after code generation. Check the project for any errors.",
+        "fileBackedUp": "The original {0} file was backed up successfully as {1}"
     },
     "codeGen": {
         "success": "The {0} stub generated successfully",

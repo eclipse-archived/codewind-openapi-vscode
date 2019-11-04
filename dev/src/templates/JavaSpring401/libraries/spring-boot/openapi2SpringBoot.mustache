@@ -1,0 +1,180 @@
+package {{basePackage}};
+
+import com.fasterxml.jackson.databind.Module;
+
+import java.util.List;
+
+import org.openapitools.jackson.nullable.JsonNullableModule;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.ExitCodeGenerator;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+{{^reactive}}
+import org.springframework.format.FormatterRegistry;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.validation.MessageCodesResolver;
+import org.springframework.validation.Validator;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
+import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
+import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+    {{^useSpringfox}}
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+    {{/useSpringfox}}
+import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+    {{^java8}}
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+    {{/java8}}
+{{/reactive}}
+{{#reactive}}
+import org.springframework.web.reactive.config.CorsRegistry;
+    {{^useSpringfox}}
+import org.springframework.web.reactive.config.ResourceHandlerRegistry;
+    {{/useSpringfox}}
+import org.springframework.web.reactive.config.WebFluxConfigurer;
+{{/reactive}}
+
+@SpringBootApplication
+@ComponentScan(basePackages = {"{{basePackage}}", "{{apiPackage}}" , "{{configPackage}}"})
+public class OpenAPI2SpringBoot implements CommandLineRunner {
+
+    @Override
+    public void run(String... arg0) throws Exception {
+        if (arg0.length > 0 && arg0[0].equals("exitcode")) {
+            throw new ExitException();
+        }
+    }
+
+{{#mavenPomExists}}
+//    The OpenAPI Tools disabled this main class so that the existing implicitly or explicitly configured main class is not overridden.
+//    To use this main class and enable the OpenAPI endpoints, uncomment the main method and explicitly configure this main class.
+//    For example, provide the <configuration><mainClass> or <start-class> elements in the pom.xml file. Alternatively, merge the contents
+//    of this class, including the packages listed in the @ComponenScan annotation, with the existing main class.
+//    public static void main(String[] args) throws Exception {
+//        new SpringApplication(OpenAPI2SpringBoot.class).run(args);
+//    }
+{{/mavenPomExists}}
+{{^mavenPomExists}}
+    public static void main(String[] args) throws Exception {
+        new SpringApplication(OpenAPI2SpringBoot.class).run(args);
+    }
+{{/mavenPomExists}}
+
+    static class ExitException extends RuntimeException implements ExitCodeGenerator {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public int getExitCode() {
+            return 10;
+        }
+
+    }
+
+    @Bean
+    public Web{{^reactive}}Mvc{{/reactive}}{{#reactive}}Flux{{/reactive}}Configurer webConfigurer() {
+       return new Web{{^reactive}}Mvc{{/reactive}}{{#reactive}}Flux{{/reactive}}Configurer{{^java8}}Adapter{{/java8}}() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**")
+                        .allowedOrigins("*")
+                        .allowedMethods("*")
+                        .allowedHeaders("Content-Type");
+            }
+
+            @Override
+            public void addResourceHandlers(ResourceHandlerRegistry registry) {
+				registry.addResourceHandler("/openapi/**").addResourceLocations("classpath:/META-INF/resources/");
+            }
+
+			@Override
+			public void addViewControllers(ViewControllerRegistry registry) {
+				registry.addRedirectViewController("/openapi/api-docs", "/api-docs");
+				registry.addRedirectViewController("/openapi/swagger-resources/configuration/ui","/swagger-resources/configuration/ui");
+				registry.addRedirectViewController("/openapi/swagger-resources/configuration/security","/swagger-resources/configuration/security");
+				registry.addRedirectViewController("/openapi/swagger-resources", "/swagger-resources");
+			}
+
+			@Override
+			public void configurePathMatch(PathMatchConfigurer configurer) {
+			}
+
+			@Override
+			public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+			}
+
+			@Override
+			public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+			}
+
+			@Override
+			public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+			}
+
+			@Override
+			public void addFormatters(FormatterRegistry registry) {
+			}
+
+			@Override
+			public void addInterceptors(InterceptorRegistry registry) {
+			}
+
+			@Override
+			public void configureViewResolvers(ViewResolverRegistry registry) {
+			}
+
+			@Override
+			public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+			}
+
+			@Override
+			public void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
+			}
+
+			@Override
+			public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+			}
+
+			@Override
+			public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+			}
+
+			@Override
+			public void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
+			}
+
+			@Override
+			public void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
+			}
+
+			@Override
+			public Validator getValidator() {
+				return null;
+			}
+
+			@Override
+			public MessageCodesResolver getMessageCodesResolver() {
+				return null;
+			}
+{{^useSpringfox}}
+
+{{/useSpringfox}}
+        };
+    }
+
+    @Bean
+    public Module jsonNullableModule() {
+        return new JsonNullableModule();
+    }
+
+}

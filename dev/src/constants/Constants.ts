@@ -250,4 +250,6 @@ export default class Constants {
         placeHolder: Translator.getString("commands.selectServerGenType"),
         onDidSelectItem: (item) => Log.i(`Item ${item} is selected`)
     };
+
+    public static readonly OPENAPI_GENERATOR_IGNORE_FILE_EXISTS: string = "OPENAPI_GENERATOR_IGNORE_FILE_EXISTS";
 }

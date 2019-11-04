@@ -25,9 +25,10 @@ export default abstract class AbstractGenerateCommand extends AbstractDockerComm
     protected fqPathToDefinition: string = "";
     protected fqPathOutputLocation: string = "";
     protected preferredSourceLocation: string = "";
-    protected childSourceFolderToAppend: string = "";
     protected projectLanguage: string = "";
     protected pathSeparator: string = "";
+    protected projectType: string = "";
+    protected selectedUriFolder: vscode.Uri = vscode.Uri.parse("file://");
 
     constructor(protected readonly _generatorType: string) {
         super();
@@ -44,7 +45,14 @@ export default abstract class AbstractGenerateCommand extends AbstractDockerComm
             if (Reflect.has(selection, "localPath")) {
                 this.localPath = Reflect.get(selection, "localPath");
             }
+            if (Reflect.has(selection, "type")) {
+                var typeField = Reflect.get(selection, "type");
+                if (Reflect.has(typeField, "internalType")) {
+                    this.projectType = Reflect.get(typeField, "internalType");
+                }
+            }
             Log.i("Selected project is: " + this.projectName);
+            Log.i("Selected projectType is: " + this.projectType);
             Log.i("Selected project local path is: " + this.localPath.fsPath + " , " + this.localPath.path);
         }
     }
@@ -131,7 +139,7 @@ export default abstract class AbstractGenerateCommand extends AbstractDockerComm
                 canSelectFiles: true,
                 canSelectFolders: false,
                 canSelectMany: false,
-                defaultUri: this.childSourceFolderToAppend.length === 0 ? this.localPath : vscode.Uri.file(this.localPath.fsPath.toString() + this.childSourceFolderToAppend),
+                defaultUri: this.localPath,
                 filters: { [`${Translator.getString("wizard.openApiFilter")}`]: ['yaml', 'yml', 'json'] },
                 openLabel: Translator.getString("wizard.promptForDefinition") // Has to be short, for the 'button'
             };
@@ -174,7 +182,7 @@ export default abstract class AbstractGenerateCommand extends AbstractDockerComm
                 canSelectFiles: false,
                 canSelectFolders: true,
                 canSelectMany: false,
-                defaultUri: this.childSourceFolderToAppend.length === 0 ? this.localPath : vscode.Uri.file(this.localPath.fsPath.toString() + this.childSourceFolderToAppend),
+                defaultUri: this.preferredSourceLocation.length === 0 ? this.localPath : vscode.Uri.file(this.localPath.fsPath.toString() + this.preferredSourceLocation),
                 openLabel: Translator.getString("wizard.selectOutputFolder") // Has to be short, for the 'button'
             };
             var selectedWSFolder: vscode.Uri[] = [];
@@ -198,20 +206,20 @@ export default abstract class AbstractGenerateCommand extends AbstractDockerComm
                 return;
             }
             // ***** -o Generator output option ***
-            var selectedUriFolder = selectedWSFolder[0];
-            this.fqPathOutputLocation = this.getPlatformPath(selectedUriFolder.path);
+            this.selectedUriFolder = selectedWSFolder[0];
+            this.fqPathOutputLocation = this.getPlatformPath(this.selectedUriFolder.path);
             // ************************************   
             try {
-                Log.i("Check .openapi-generator-ignore file:" + selectedUriFolder.fsPath + this.pathSeparator + ".openapi-generator-ignore");
-                if (fs.lstatSync(selectedUriFolder.fsPath + this.pathSeparator + ".openapi-generator-ignore").isFile()) {
+                Log.i("Check .openapi-generator-ignore file:" + this.selectedUriFolder.fsPath + this.pathSeparator + ".openapi-generator-ignore");
+                if (fs.lstatSync(this.selectedUriFolder.fsPath + this.pathSeparator + ".openapi-generator-ignore").isFile()) {
                     const response = await vscode.window.showWarningMessage(Translator.getString("wizard.promptToOverwrite"), {modal : true}, Translator.getString("wizard.yes"));
                     if (response === Translator.getString("wizard.yes")) {
-                        resolve();
+                        resolve(Constants.OPENAPI_GENERATOR_IGNORE_FILE_EXISTS); // Ok, to continue to generate
                     } else {
                         reject("Overwrite files was declined");  // For log
                     }
                 } else {
-                    reject(false); // It's a folder
+                    reject("Unexpected folder .openapi-generator-ignore exists."); // It's a folder.  This should not expected
                 }
             } catch (e) {
                 // .openapi-generator-ignore file does not exist, so should be ok to generate without overwriting files

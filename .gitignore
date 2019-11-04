@@ -5,5 +5,8 @@ node_modules/
 .project
 .DS_Store
 .nyc_output
+dev/src/test/**/.classpath
+dev/src/test/**/.settings
+.settings/*
 dev/LICENSE
 README.md
