@@ -52,20 +52,14 @@ spec:
                 }
             }
         }
-        stage ("Upload") {
-            // This when clause disables PR build uploads; you may comment this out if you want your build uploaded.
-            when {
-                beforeAgent true
-                not {
-                    changeRequest()
-                }
-            }
-
+        stage ('Deploy') {
             agent any
             steps {
                 sshagent (['projects-storage.eclipse.org-bot-ssh']) {
                     unstash 'deployables'
                     
+                    println("Deploying codewind-openapi-vscode to downoad area...")
+
                     sh '''#!/usr/bin/env bash
                         export REPO_NAME="codewind-openapi-vscode"
                         export OUTPUT_NAME="codewind-openapi-tools"
@@ -75,31 +69,33 @@ spec:
                         export sshHost="genie.codewind@projects-storage.eclipse.org"
                         export deployParentDir="/home/data/httpd/download.eclipse.org/codewind/$REPO_NAME"
                         
-                        UPLOAD_DIR="$GIT_BRANCH/$BUILD_ID"
-                        BUILD_URL="$DOWNLOAD_AREA_URL/$UPLOAD_DIR"
+                        if [ -z $CHANGE_ID ]; then
+                            UPLOAD_DIR="$GIT_BRANCH/$BUILD_ID"
+                            BUILD_URL="$DOWNLOAD_AREA_URL/$UPLOAD_DIR"
 
-                        ssh $sshHost rm -rf $deployParentDir/$GIT_BRANCH/$LATEST_DIR
-                        ssh $sshHost mkdir -p $deployParentDir/$GIT_BRANCH/$LATEST_DIR
+                            ssh $sshHost rm -rf $deployParentDir/$GIT_BRANCH/$LATEST_DIR
+                            ssh $sshHost mkdir -p $deployParentDir/$GIT_BRANCH/$LATEST_DIR
 
-                        cp $OUTPUT_NAME-*.vsix $OUTPUT_NAME.vsix
-                        scp $OUTPUT_NAME.vsix $sshHost:$deployParentDir/$GIT_BRANCH/$LATEST_DIR/$OUTPUT_NAME.vsix
+                            cp $OUTPUT_NAME-*.vsix $OUTPUT_NAME.vsix
+                            scp $OUTPUT_NAME.vsix $sshHost:$deployParentDir/$GIT_BRANCH/$LATEST_DIR/$OUTPUT_NAME.vsix
 
-                        echo "# Build date: $(date +%F-%T)" >> $BUILD_INFO
-                        echo "build_info.url=$BUILD_URL" >> $BUILD_INFO
-                        SHA1=$(sha1sum ${OUTPUT_NAME}.vsix | cut -d ' ' -f 1)
-                        echo "build_info.SHA-1=${SHA1}" >> $BUILD_INFO
+                            echo "# Build date: $(date +%F-%T)" >> $BUILD_INFO
+                            echo "build_info.url=$BUILD_URL" >> $BUILD_INFO
+                            SHA1=$(sha1sum ${OUTPUT_NAME}.vsix | cut -d ' ' -f 1)
+                            echo "build_info.SHA-1=${SHA1}" >> $BUILD_INFO
 
-                        scp $BUILD_INFO $sshHost:$deployParentDir/$GIT_BRANCH/$LATEST_DIR/$BUILD_INFO
-                        rm $BUILD_INFO
-                        rm $OUTPUT_NAME.vsix
-                        
-                        export deployDir="$deployParentDir/$UPLOAD_DIR"
+                            scp $BUILD_INFO $sshHost:$deployParentDir/$GIT_BRANCH/$LATEST_DIR/$BUILD_INFO
+                            rm $BUILD_INFO
+                            rm $OUTPUT_NAME.vsix
+                        else
+                            UPLOAD_DIR="pr/$CHANGE_ID/$BUILD_ID"
+                        fi
 
-                        printf "Uploading files:\n$(ls -l *.vsix)\n"
+                        ssh $sshHost rm -rf $deployParentDir/${UPLOAD_DIR}
+                        ssh $sshHost mkdir -p $deployParentDir/${UPLOAD_DIR}
+                        scp -r *.vsix $sshHost:$deployParentDir/${UPLOAD_DIR}
 
-                        ssh $sshHost mkdir -p $deployDir
-                        scp *.vsix $sshHost:$deployDir
-                        echo "Uploaded to https://download.eclipse.org${deployDir##*download.eclipse.org}"
+                        echo "Uploaded to https://download.eclipse.org${deployParentDir##*download.eclipse.org}"
                     '''
                 }
             }
