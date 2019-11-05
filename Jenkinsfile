@@ -86,7 +86,6 @@ spec:
 
                             scp $BUILD_INFO $sshHost:$deployParentDir/$GIT_BRANCH/$LATEST_DIR/$BUILD_INFO
                             rm $BUILD_INFO
-                            rm $OUTPUT_NAME.vsix
                         else
                             UPLOAD_DIR="pr/$CHANGE_ID/$BUILD_ID"
                         fi
