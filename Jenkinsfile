@@ -63,7 +63,7 @@ spec:
                 sshagent (['projects-storage.eclipse.org-bot-ssh']) {
                     unstash 'deployables'
                     
-                    println("Deploying codewind-openapi-vscode to downoad area...")
+                    println("Deploying codewind-openapi-vscode to download area...")
 
                     sh '''#!/usr/bin/env bash
                         export REPO_NAME="codewind-openapi-vscode"
