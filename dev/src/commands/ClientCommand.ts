@@ -20,6 +20,8 @@ export default class ClientCommand extends AbstractGenerateStubCommand {
     protected goTypes : string[] = ['go'];
     // Java - Lagom, MP/JEE, Spring
     protected javaTypes : string[] = ['java', 'jaxrs-cxf-client'];
+    protected javaSpringTypes : string[] = [];
+    protected codewindTypes : string[] = ['java', 'jaxrs-cxf-client'];
     // Node
     protected nodeTypes : string[] = ['javascript',
             'javascript-closure-angular',

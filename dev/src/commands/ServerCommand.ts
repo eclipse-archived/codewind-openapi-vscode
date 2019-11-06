@@ -30,9 +30,12 @@ export default class ServerCommand extends AbstractGenerateStubCommand {
                                         'jaxrs-cxf-cdi',
                                         'jaxrs-jersey',
                                         'jaxrs-resteasy',
-                                        'jaxrs-resteasy-eap',
-                                        'spring'
+                                        'jaxrs-resteasy-eap'
                                     ];
+
+    protected javaSpringTypes : string[] = ['spring'];
+
+    protected codewindTypes : string[] = ['jaxrs-spec','jaxrs-cxf'];
 
     // Node
     protected nodeTypes : string[] = ['nodejs-server'];
