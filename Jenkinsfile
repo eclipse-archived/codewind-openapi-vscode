@@ -30,6 +30,14 @@ spec:
 
     stages {
         stage('Build') {
+            // This when clause disables Tagged build
+            when {
+                beforeAgent true
+                not {
+                    buildingTag()
+                }
+            }
+
             steps {
                 container("node") {
                     dir('dev') {
@@ -53,6 +61,13 @@ spec:
             }
         }
         stage ('Deploy') {
+            // This when clause disables Tagged build
+            when {
+                beforeAgent true
+                not {
+                    buildingTag()
+                }
+            }
 
             options {
                 skipDefaultCheckout()
