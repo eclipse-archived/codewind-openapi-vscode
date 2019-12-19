@@ -38,7 +38,7 @@ export default class ServerCommand extends AbstractGenerateStubCommand {
     protected codewindTypes : string[] = ['jaxrs-spec','jaxrs-cxf'];
 
     // Node
-    protected nodeTypes : string[] = ['nodejs-server'];
+    protected nodeTypes : string[] = ['nodejs-express-server', 'nodejs-server-deprecated'];
     // Python
     protected pythonTypes : string[] = ['python-flask'];
     // Swift

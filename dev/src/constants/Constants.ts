@@ -98,7 +98,7 @@ SERVER generators:
     - jaxrs-spec
     - kotlin-server
     - kotlin-spring
-    - nodejs-server
+    - nodejs-express-server, nodejs-server-deprecated
     - php-laravel
     - php-lumen
     - php-silex
@@ -193,7 +193,7 @@ export default class Constants {
             'jaxrs-resteasy',
             'jaxrs-resteasy-eap',
             'spring']],
-        ['Node.js', ['nodejs-server']],
+        ['Node.js', ['nodejs-express-server', 'nodejs-server-deprecated']],
         ['Python', ['python-flask']],
         ['Swift', []],
         ['Ada', ['ada-server']],
