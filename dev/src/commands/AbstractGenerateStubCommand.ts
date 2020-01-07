@@ -252,7 +252,7 @@ export default abstract class AbstractGenerateStubCommand extends AbstractGenera
             }
             // End of workaround /////////////////////////////////////
             await docker.run(
-                "openapitools/openapi-generator-cli:v4.0.1", 
+                this.openapiGeneratorImage,
                 cmdLineArgs,
                 outStr,
                 {HostConfig: {"Binds": [`${this.fqPathToDefinition}:/gen`, `${this.fqPathOutputLocation}:/out`] }},

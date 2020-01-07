@@ -17,10 +17,11 @@ import Log from '../util/Logger';
 export default abstract class AbstractDockerCommand {
 
     protected imageExists : boolean = false;
+    protected openapiGeneratorImage : string = "openapitools/openapi-generator-cli:v4.2.2";
 
     protected async checkDockerImage(docker: any): Promise<boolean> {
-        return new Promise<boolean>(async function (resolve, reject)  {
-            var opts = {"filters": '{"reference": ["openapitools/openapi-generator-cli:v4.0.1"]}'};
+        return new Promise<boolean>(async (resolve, reject) => {
+            var opts = {"filters": '{"reference": ["' + this.openapiGeneratorImage + '"]}'};
             Log.i("Calling docker.listImages()");    
             await docker.listImages(opts, function(error: NodeJS.ErrnoException, addresses: string[]) {
                 Log.i("docker.listImages() error is " + error);
@@ -53,8 +54,8 @@ export default abstract class AbstractDockerCommand {
             return false;
         });
         Log.i("Calling docker.pull() after authCheck: " + authCheck);
-        return new Promise<boolean>(async function (resolve, reject) {
-            await docker.pull('openapitools/openapi-generator-cli:v4.0.1', async (error: any, streamo: any) => {
+        return new Promise<boolean>(async (resolve, reject) => {
+            await docker.pull(this.openapiGeneratorImage, async (error: any, streamo: any) => {
                 // Log the output of pull.
                 // streamo.on('data', (d: any) => {
                 //    Log.i(d.toString());
