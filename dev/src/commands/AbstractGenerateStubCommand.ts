@@ -229,7 +229,15 @@ export default abstract class AbstractGenerateStubCommand extends AbstractGenera
             var docker = new dockerode();
             var outStr = await this.enableProgressReporter(progress);
             var cmdLineArgs : String[];
-            
+
+            // Set up the command line args. See if-else clauses below
+
+            // The following vars are for jaxrs-spec server generation only.
+            // Codewind APIs do not give us server-specific details. It currently gives us docker or appsodyExtension project types.
+            // Also, this needs to work when the commands are launched from the command palette where we don't have access to the project type information.
+            // For now, simply check for the presence of the server.xml in the liberty folder in the project
+            var isLiberty : boolean = await fs.existsSync(this.localPath.fsPath + "/src/main/liberty/config/server.xml");
+            var isAppsodyLiberty : boolean = isLiberty && await fs.existsSync(this.localPath.fsPath + "/.appsody-config.yaml");
             //////////////////////////////////////////////////////////
             // Workaround for Java spring server generator only
             //////////////////////////////////////////////////////////
@@ -246,6 +254,11 @@ export default abstract class AbstractGenerateStubCommand extends AbstractGenera
                     // cmdLineArgs = ['generate', '-i', '/gen/' + this.selectedDefinition, '-g', this.selectedGeneratorType, '--enable-post-process-file', '-java8', '-t', "/out/.cwopenapitemplates/", '-o', '/out'];
                     Log.i("Mapped gen command is " + 'generate  -i /gen/' + this.selectedDefinition + ' -g ' + this.selectedGeneratorType + ' -t ' + "/out/.cwopenapitemplates/" + ' -o /out -v ' + this.fqPathToDefinition + ':/gen' + " -v " + this.fqPathOutputLocation +':/out');
                 }
+            } else if (this.selectedGeneratorType === "jaxrs-spec" && (this.projectType.toLowerCase().indexOf("liberty") >= 0 || 
+                (this.projectType.toLowerCase().indexOf("docker") >= 0 && isLiberty) || 
+                (this.projectType.toLowerCase().indexOf("appsodyextension") >= 0 && isAppsodyLiberty)) ) {
+                cmdLineArgs = ['generate', '-i', '/gen/' + this.selectedDefinition, '-g', this.selectedGeneratorType, '--library', 'openliberty', '--enable-post-process-file', '-o', '/out'];
+                Log.i("Mapped jax-rs spec gen command is " + 'generate -i /gen/' + this.selectedDefinition + ' -g ' + this.selectedGeneratorType + '--library openliberty' + ' -o /out -v ' + this.fqPathToDefinition + ':/gen' + " -v " + this.fqPathOutputLocation +':/out');
             } else {
                 cmdLineArgs = ['generate', '-i', '/gen/' + this.selectedDefinition, '-g', this.selectedGeneratorType, '--enable-post-process-file', '-o', '/out'];
                 Log.i("Mapped gen command is " + 'generate -i /gen/' + this.selectedDefinition + ' -g ' + this.selectedGeneratorType + ' -o /out -v ' + this.fqPathToDefinition + ':/gen' + " -v " + this.fqPathOutputLocation +':/out');
