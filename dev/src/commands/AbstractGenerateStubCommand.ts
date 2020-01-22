@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2020 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -236,8 +236,8 @@ export default abstract class AbstractGenerateStubCommand extends AbstractGenera
             // Codewind APIs do not give us server-specific details. It currently gives us docker or appsodyExtension project types.
             // Also, this needs to work when the commands are launched from the command palette where we don't have access to the project type information.
             // For now, simply check for the presence of the server.xml in the liberty folder in the project
-            var isLiberty : boolean = await fs.existsSync(this.localPath.fsPath + "/src/main/liberty/config/server.xml");
-            var isAppsodyLiberty : boolean = isLiberty && await fs.existsSync(this.localPath.fsPath + "/.appsody-config.yaml");
+            var isLiberty : boolean = await fs.existsSync(this.localPath.fsPath + this.pathSeparator + "src" + this.pathSeparator + "main" + this.pathSeparator + "liberty" + this.pathSeparator + "config" + this.pathSeparator + "server.xml");
+            var isAppsodyLiberty : boolean = isLiberty && await fs.existsSync(this.localPath.fsPath + this.pathSeparator + ".appsody-config.yaml");
             //////////////////////////////////////////////////////////
             // Workaround for Java spring server generator only
             //////////////////////////////////////////////////////////
