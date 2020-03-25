@@ -27,6 +27,21 @@
                 "showReuseMessage": true,
                 "clear": true
         	}
+		},
+		{
+            "type": "npm",
+            "script": "test-setup",
+            "isBackground": false,
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": true
+        	}
+		}, 
+		{
+            "label": "build",
+            "dependsOn": [ "npm: compile", "npm: copy-strings", "npm: test-setup" ]
         }
 	]
 }
