@@ -10,10 +10,25 @@
 			"args": [
 				"--extensionDevelopmentPath=${workspaceFolder}"
 			],
+			"preLaunchTask": "build",
 			"outFiles": [
 				"${workspaceFolder}/dev/out/**/*.js"
 			]
-		}
+		},
+        {
+            "name": "Extension Tests",
+            "type": "extensionHost",
+            "request": "launch",
+            "runtimeExecutable": "${execPath}",
+            "args": [
+                "--extensionDevelopmentPath=${workspaceFolder}",
+                "--extensionTestsPath=${workspaceFolder}/out/test/Index.js"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/dev/out/test/**/*.js"
+            ],
+            "preLaunchTask": "build"
+        }
 
 	]
 }

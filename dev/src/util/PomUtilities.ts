@@ -41,12 +41,7 @@ export default class PomUtilities {
                 };
                 var generatedFile = await Utils.getUniqueFileName(filePath, "pom-generated", ".xml");
                 // Code gen just occurred so the pom.xml now is from the generator.
-                await fs.copyFile(filePath + "/pom.xml", filePath + "/" + generatedFile, async (e: any) => {
-                    if (e) {
-                        Log.e(e);
-                        reject(false);  // Can't merge
-                    }
-                });
+                await fs.renameSync(filePath + "/pom.xml", filePath + "/" + generatedFile);
                 var xmlData = fs.readFileSync(filePath + "/" + originalFile, "utf8");                    
                 if (xmlData) {
                     var origPomJsonObject = X2J.parse(xmlData, options);
@@ -61,11 +56,11 @@ export default class PomUtilities {
                     if (origPomJsonObject && genPomJsonObject) {
                         try {
                             // Merge properties
-                            PomUtilities.mergeProperties(origPomJsonObject, genPomJsonObject);
+                            await PomUtilities.mergeProperties(origPomJsonObject, genPomJsonObject);
                             // Merge dependencies
-                            PomUtilities.mergeDependencies(origPomJsonObject, genPomJsonObject);
+                            await PomUtilities.mergeDependencies(origPomJsonObject, genPomJsonObject);
                             // Merge build plugins
-                            PomUtilities.mergeBuildPlugins(origPomJsonObject, genPomJsonObject);
+                            await PomUtilities.mergeBuildPlugins(origPomJsonObject, genPomJsonObject);
 
                         } catch (e) {
                             Log.e(e);

@@ -15,6 +15,7 @@
 		// "noUnusedLocals": true, /* Report errors on unused locals. */
 		"noUnusedParameters": true,  /* Report errors on unused parameters. */
 		"forceConsistentCasingInFileNames": true,
+		"esModuleInterop": true
 	},
 	"exclude": [
 		"node_modules",
