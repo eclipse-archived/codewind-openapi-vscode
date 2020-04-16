@@ -79,7 +79,7 @@ spec:
                         export LATEST_DIR="latest"
                         export BUILD_INFO="build_info.properties"
                         export sshHost="genie.codewind@projects-storage.eclipse.org"
-                        export deployDir="/home/data/httpd/download.eclipse.org/codewind/$REPO_NAME"
+                        export deployDir="/home/data/httpd/archive.eclipse.org/codewind/$REPO_NAME"
                         
                         if [ -z $CHANGE_ID ]; then
                             UPLOAD_DIR="$GIT_BRANCH/$BUILD_ID"
@@ -108,7 +108,7 @@ spec:
                         ls *.vsix
                         scp -r *.vsix $sshHost:$deployDir/${UPLOAD_DIR}
 
-                        echo "Uploaded to https://download.eclipse.org${deployDir##*download.eclipse.org}"
+                        echo "Uploaded to https://archive.eclipse.org${deployDir##*archive.eclipse.org}"
                     '''
                 }
             }
