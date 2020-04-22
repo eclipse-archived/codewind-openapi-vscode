@@ -53,6 +53,13 @@ spec:
             }
         }
         stage ('Deploy') {
+            // This when clause disables PR build uploads; you may comment this out if you want your build uploaded.
+            when {
+                beforeAgent true
+                not {
+                    changeRequest()
+                }
+            }
 
             options {
                 skipDefaultCheckout()
@@ -63,20 +70,20 @@ spec:
                 sshagent (['projects-storage.eclipse.org-bot-ssh']) {
                     unstash 'deployables'
                     
-                    println("Deploying codewind-openapi-vscode to download area...")
+                    println("Deploying codewind-openapi-vscode to archive area...")
 
                     sh '''#!/usr/bin/env bash
                         export REPO_NAME="codewind-openapi-vscode"
                         export OUTPUT_NAME="codewind-openapi-tools"
-                        export DOWNLOAD_AREA_URL="https://download.eclipse.org/codewind/$REPO_NAME"
+                        export ARCHIVE_AREA_URL="https://archive.eclipse.org/codewind/$REPO_NAME"
                         export LATEST_DIR="latest"
                         export BUILD_INFO="build_info.properties"
                         export sshHost="genie.codewind@projects-storage.eclipse.org"
-                        export deployDir="/home/data/httpd/download.eclipse.org/codewind/$REPO_NAME"
+                        export deployDir="/home/data/httpd/archive.eclipse.org/codewind/$REPO_NAME"
                         
                         if [ -z $CHANGE_ID ]; then
                             UPLOAD_DIR="$GIT_BRANCH/$BUILD_ID"
-                            BUILD_URL="$DOWNLOAD_AREA_URL/$UPLOAD_DIR"
+                            BUILD_URL="$ARCHIVE_AREA_URL/$UPLOAD_DIR"
 
                             ssh $sshHost rm -rf $deployDir/$GIT_BRANCH/$LATEST_DIR
                             ssh $sshHost mkdir -p $deployDir/$GIT_BRANCH/$LATEST_DIR
@@ -101,7 +108,7 @@ spec:
                         ls *.vsix
                         scp -r *.vsix $sshHost:$deployDir/${UPLOAD_DIR}
 
-                        echo "Uploaded to https://download.eclipse.org${deployDir##*download.eclipse.org}"
+                        echo "Uploaded to https://archive.eclipse.org${deployDir##*archive.eclipse.org}"
                     '''
                 }
             }
