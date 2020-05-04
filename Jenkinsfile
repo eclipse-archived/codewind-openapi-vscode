@@ -185,9 +185,11 @@ spec:
 
     post {
         failure {
-            if (IS_MASTER_BRANCH || IS_RELEASE_BRANCH)  {
-                echo "Calling sendEmailNotification()"
-                sendEmailNotification()
+            steps {
+                if (IS_MASTER_BRANCH || IS_RELEASE_BRANCH)  {
+                    echo "Calling sendEmailNotification()"
+                    sendEmailNotification()
+                }
             }
         }
     }
