@@ -65,6 +65,9 @@ def sendEmailNotification() {
     }
 }
 
+def IS_MASTER_BRANCH = env.BRANCH_NAME == "master"
+def IS_RELEASE_BRANCH = (env.BRANCH_NAME ==~ /\d+\.\d+\.\d+/)
+
 pipeline {
     agent {
         kubernetes {
@@ -182,8 +185,10 @@ spec:
 
     post {
         failure {
-            echo "Calling sendEmailNotification()"
+            if (IS_MASTER_BRANCH || IS_RELEASE_BRANCH)  {
+                echo "Calling sendEmailNotification()"
                 sendEmailNotification()
+            }
         }
     }
 }
