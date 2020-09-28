@@ -3,15 +3,17 @@
 [![Chat](https://img.shields.io/static/v1.svg?label=chat&message=mattermost&color=145dbf)](https://mattermost.eclipse.org/eclipse/channels/eclipse-codewind)
 [![Gitter](https://badges.gitter.im/OpenAPITools/openapi-generator.svg)](https://gitter.im/OpenAPITools/openapi-generator)
 
-# Codewind OpenAPI Tools for VS Code
+# OpenAPI Tools for Eclipse Codewind for VS Code
 
-The Codewind OpenAPI Tools for VS Code provides commands that invoke the OpenAPI Generator to create API clients, server stubs, and HTML documentation from OpenAPI Specifications. The tools are integrated and customized to work with Codewind for VS Code, but they can also work without the Codewind extension.
+The OpenAPI Tools for Eclipse Codewind for VS Code provides commands that invoke the OpenAPI Generator to create API clients, server stubs, and HTML documentation from OpenAPI Specifications. The tools are integrated and customized to work with Eclipse Codewind for VS Code, but they can also work without the Codewind extension.
+
+Codewind and the Codewind logo are trademarks of the Eclipse Foundation.
 
 ## Installing
 1. Install [VS Code version 1.27 or later](https://code.visualstudio.com/download).
 2. (OPTIONAL) Install Codewind for VS Code from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=IBM.codewind) or by searching for `Codewind` in the [VS Code Extensions view](https://code.visualstudio.com/docs/editor/extension-gallery#_browse-for-extensions).
 3. This extension pulls the [OpenAPI Generator CLI Docker Image](https://github.com/OpenAPITools/openapi-generator#16---docker) and runs the OpenAPI Generator in a Docker container. Install Docker if necessary.
-4. Install the Codewind OpenAPI Tools extension from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=IBM.codewind-openapi-tools).
+4. Install the OpenAPI Tools for Eclispe Codewind for VS Code extension from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=IBM.codewind-openapi-tools).
 
 ## Running commands
 1. Before you run a command, ensure the OpenAPI definition is in the folder or project.
